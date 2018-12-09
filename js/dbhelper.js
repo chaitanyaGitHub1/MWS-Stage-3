@@ -11,15 +11,21 @@ class DBHelper {
     return `http://localhost:${port}/restaurants`;
   }
 
+  static get REVIEWS_URL() {
+    const port = 1337; // Change this to your server port
+    return `http://localhost:${port}/reviews/`;
+  }
+
+
   static indexDB(restaurants) {
     if (window.indexedDB) {
       let request = indexedDB.open("idb-restaurant", 1);
 
-      request.onerror = function(e) {
+      request.onerror = function (e) {
         console.log(e);
       };
 
-      request.onupgradeneeded = function(e) {
+      request.onupgradeneeded = function (e) {
         var db = e.target.result;
         var objectStore = db.createObjectStore("idb-restaurant", {
           keyPath: "id"
@@ -27,17 +33,17 @@ class DBHelper {
         objectStore.createIndex("neighborhood", "neighborhood", {
           unique: false
         });
-        objectStore.transaction.oncomplete = function(e) {
+        objectStore.transaction.oncomplete = function (e) {
           var store = db
             .transaction(["idb-restaurant"], "readwrite")
             .objectStore("idb-restaurant");
-          restaurants.forEach(function(restaurant) {
+          restaurants.forEach(function (restaurant) {
             store.put(restaurant);
           });
         };
       };
 
-      request.onsuccess = function(e) {
+      request.onsuccess = function (e) {
         console.log("success");
       };
     }
@@ -224,8 +230,7 @@ class DBHelper {
   static mapMarkerForRestaurant(restaurant, map) {
     // https://leafletjs.com/reference-1.3.0.html#marker
     const marker = new L.marker(
-      [restaurant.latlng.lat, restaurant.latlng.lng],
-      {
+      [restaurant.latlng.lat, restaurant.latlng.lng], {
         title: restaurant.name,
         alt: restaurant.name,
         url: DBHelper.urlForRestaurant(restaurant)
@@ -244,4 +249,55 @@ class DBHelper {
     );
     return marker;
   } */
+  static addReview(review) {
+    return fetch(DBHelper.REVIEWS_URL, {
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(review)
+    });
+  }
+
+  static fetchReviews(id) {
+    fetch(DBHelper.REVIEWS_URL)
+      .then(function (response) {
+        return response.json();
+      }).then(reviews => {
+        const reviewsById = reviews.filter(r => r.restaurant_id == id);
+        if (reviewsById)
+          fillReviewsHTML(reviewsById);
+        else
+          fillReviewsHTML(null);
+      });
+  }
+
+  static submitFavRestaurant(id, flag) {
+    fetch(`${DBHelper.DATABASE_URL}/${id}/?is_favorite=${flag}`, {
+      method: 'put'
+    })
+  }
+
+  static treatPendingRevs(revs) {
+    revs.map(rev => {
+      fetch(DBHelper.REVIEWS_URL, {
+          method: 'post',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(rev)
+        })
+        .then(response => {
+          console.log('posted revs to server');
+          if (response.status === 201) {
+            return reviewsStore.revsidb('readwrite').then(function (revsidb) {
+              return revsidb.delete(rev.id);
+            });
+          }
+        })
+    })
+  }
+
+
+
 }

@@ -336,8 +336,11 @@ table tr:nth-child(2n + 1) {
 #reviews-container {
   padding: 30px 40px 80px;
 }
+.resrew {
+  padding-top: 20px;
+}
 #reviews-container h2 {
-  color: #f58500;
+  color: rgb(0, 0, 0);
   font-size: 24pt;
   font-weight: 300;
   letter-spacing: -1px;
@@ -420,6 +423,92 @@ table tr:nth-child(2n + 1) {
   grid-template-areas: "ldiv rdiv";
 }
 
+.resrew {
+  margin-left: 25px;
+  display: grid;
+  grid-auto-columns: 1fr 2fr;
+  grid-template-areas: "rform brew";
+}
+
+/* ====================== Reviews Form ====================== */
+.submit-review {
+  max-width: 500px;
+  padding: 20px 12px 10px 20px;
+  font: 13px Arial, Helvetica, sans-serif;
+}
+.submit-review-heading {
+  font-weight: bold;
+  font-family: Arial, sans-serif;
+  border-bottom: 2px solid #ddd;
+  margin-bottom: 20px;
+  font-size: 15px;
+  padding-bottom: 3px;
+}
+.submit-review label {
+  display: block;
+  margin: 0px 0px 15px 0px;
+}
+.submit-review label > span {
+  width: 100px;
+  font-weight: bold;
+  float: left;
+  padding-top: 8px;
+  padding-right: 5px;
+}
+.submit-review span.required {
+  color: red;
+}
+.submit-review .tel-number-field {
+  width: 40px;
+  text-align: center;
+}
+.submit-review input.input-field,
+.submit-review .select-field {
+  width: 48%;
+}
+.submit-review input.input-field,
+.submit-review .tel-number-field,
+.submit-review .textarea-field,
+.submit-review .select-field {
+  box-sizing: border-box;
+  border: 1px solid #c2c2c2;
+  border-radius: 3px;
+  padding: 7px;
+  outline: none;
+}
+.submit-review .input-field:focus,
+.submit-review .tel-number-field:focus,
+.submit-review .textarea-field:focus,
+.submit-review .select-field:focus {
+  border: 1px solid #0c0;
+}
+.submit-review .textarea-field {
+  height: 100px;
+  width: 55%;
+}
+.submit-review input[type="submit"],
+.submit-review input[type="button"] {
+  border: none;
+  padding: 8px 15px 8px 15px;
+  background: #19222a;
+  color: #fff;
+  box-shadow: 1px 1px 4px #dadada;
+  border-radius: 3px;
+}
+.submit-review input[type="submit"]:hover,
+.submit-review input[type="button"]:hover {
+  background: rgb(0, 0, 0);
+  color: #fff;
+}
+
+.checked {
+  color: orange;
+}
+
+.fa-heart {
+  font-size: 2em;
+}
+
 /* ==================== Media quiry for Responsive web ======================== */
 
 /* 
@@ -449,6 +538,15 @@ table tr:nth-child(2n + 1) {
     grid-template-areas:
       "ldiv "
       "rdiv";
+  }
+
+  .resrew {
+    margin-left: 25px;
+    display: grid;
+    grid-auto-columns: auto;
+    grid-template-areas:
+      "rform"
+      "brew";
   }
 }
 
@@ -498,6 +596,15 @@ table tr:nth-child(2n + 1) {
     grid-template-areas:
       "ldiv "
       "rdiv";
+  }
+
+  .resrew {
+    margin-left: 25px;
+    display: grid;
+    grid-auto-columns: auto;
+    grid-template-areas:
+      "rform"
+      "brew";
   }
   #reviews-list li {
     width: 99%;

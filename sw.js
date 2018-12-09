@@ -1,47 +1,53 @@
-const filesToCache = [
-  "/",
-  "./index.html",
-  "./restaurant.html",
-  "./css/styles.css",
-  "./js/dbhelper.js",
-  "./js/main.js",
-  "./js/restaurant_info.js",
-  "./data/restaurants.json",
-  "./img/1.jpg",
-  "./img/2.jpg",
-  "./img/3.jpg",
-  "./img/4.jpg",
-  "./img/5.jpg",
-  "./img/6.jpg",
-  "./img/7.jpg",
-  "./img/8.jpg",
-  "./img/9.jpg",
-  "./img/10.jpg",
+//code implemented following Lab: Caching Files with Service Worker from developers.google.com
+
+importScripts('/js/idb.js');
+importScripts('/js/reviewsStore.js');
+importScripts('/js/dbhelper.js');
+
+var filesToCache = [
+  '/css/styles.css',
+  '/index.html',
   "pages/offline.html",
-  "pages/404.html",
   "style/main.css"
+
 ];
 
-const staticCacheName = "pages-cache-v5";
+var staticCacheName = 'static-cache-v1';
 
-self.addEventListener("install", event => {
-  //console.log("Attempting to install service worker and cache static assets");
+self.addEventListener('install', function (event) {
   event.waitUntil(
-    caches.open(staticCacheName).then(cache => {
+    caches.open(staticCacheName)
+    .then(function (cache) {
       return cache.addAll(filesToCache);
     })
   );
 });
 
-self.addEventListener("activate", event => {
-  //console.log("Activating new service worker...");
+self.addEventListener('fetch', function (event) {
+  event.respondWith(
+    caches.match(event.request).then(function (response) {
+      if (response) return response;
 
-  const cacheWhitelist = [staticCacheName];
+      return fetch(event.request).then(function (response) {
+        return caches.open(staticCacheName).then(function (cache) {
+          cache.put(event.request.url, response.clone());
+          return response;
+        })
+      })
+    }).catch(error => {
+      //console.log("Error, ", error);
+      return caches.match("pages/offline.html");
+    })
+  );
+});
+
+self.addEventListener('activate', function (event) {
+  var cacheWhitelist = [staticCacheName];
 
   event.waitUntil(
-    caches.keys().then(cacheNames => {
+    caches.keys().then(function (cacheNames) {
       return Promise.all(
-        cacheNames.map(cacheName => {
+        cacheNames.map(function (cacheName) {
           if (cacheWhitelist.indexOf(cacheName) === -1) {
             return caches.delete(cacheName);
           }
@@ -51,30 +57,22 @@ self.addEventListener("activate", event => {
   );
 });
 
-self.addEventListener("fetch", event => {
-  //console.log("Fetch event for ", event.request.url);
-  event.respondWith(
-    caches
-      .match(event.request)
-      .then(response => {
-        if (response) {
-          //console.log("Found ", event.request.url, " in cache");
-          return response;
+self.addEventListener('sync', function (event) {
+  if (event.tag === 'penginRevs') {
+    event.waitUntil(
+      reviewsStore.revsidb('readonly').then(function (revsidb) {
+        return revsidb.getAll();
+      }).then(revs => {
+        if (!revs) {
+          console.log('no hay datos');
+          return;
         }
-        // console.log("Network request for ", event.request.url);
-        return fetch(event.request).then(response => {
-          if (response.status === 404) {
-            return caches.match("pages/404.html");
-          }
-          return caches.open(staticCacheName).then(cache => {
-            cache.put(event.request.url, response.clone());
-            return response;
-          });
-        });
+        DBHelper.treatPendingRevs(revs);
+      }).then(() => {
+        console.log('sync ok');
+      }).catch(function (err) {
+        console.error(err);
       })
-      .catch(error => {
-        //console.log("Error, ", error);
-        return caches.match("pages/offline.html");
-      })
-  );
+    );
+  }
 });

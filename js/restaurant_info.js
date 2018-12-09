@@ -23,13 +23,10 @@ initMap = () => {
         scrollWheelZoom: false
       });
       L.tileLayer(
-        "https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.jpg70?access_token={mapboxToken}",
-        {
-          mapboxToken:
-            "pk.eyJ1IjoiY2hhaXRhbnlhMDEiLCJhIjoiY2pqZWpoZHNiMGd3azNrbXMxanF2ZDB0bSJ9.qIDY44peCUHt_g_e41pH6g",
+        "https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.jpg70?access_token={mapboxToken}", {
+          mapboxToken: "pk.eyJ1IjoiY2hhaXRhbnlhMDEiLCJhIjoiY2pqZWpoZHNiMGd3azNrbXMxanF2ZDB0bSJ9.qIDY44peCUHt_g_e41pH6g",
           maxZoom: 18,
-          attribution:
-            'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+          attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
             '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
             'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
           id: "mapbox.streets"
@@ -110,7 +107,7 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
     fillRestaurantHoursHTML();
   }
   // fill reviews
-  fillReviewsHTML();
+  DBHelper.fetchReviews(restaurant.id)
 };
 
 /**
@@ -228,3 +225,18 @@ getParameterByName = (name, url) => {
   if (!results[2]) return "";
   return decodeURIComponent(results[2].replace(/\+/g, " "));
 };
+
+
+clearForm = () => {
+  document.querySelector('#name').value = '';
+  document.querySelector('#rate').value = '';
+  document.querySelector('#comment').value = '';
+}
+
+markFavourite = (favStar) => {
+  let id = getParameterByName('id');
+  let name =
+    favStar.classList.toggle('checked');
+  let flag = favStar.classList.contains('checked');
+  DBHelper.submitFavRestaurant(id, flag);
+}
